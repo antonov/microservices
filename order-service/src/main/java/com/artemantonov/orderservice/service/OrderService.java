@@ -3,11 +3,13 @@ package com.artemantonov.orderservice.service;
 import com.artemantonov.orderservice.dto.InventoryResponse;
 import com.artemantonov.orderservice.dto.OrderLineItemsDto;
 import com.artemantonov.orderservice.dto.OrderRequest;
+import com.artemantonov.orderservice.event.OrderPlacedEvent;
 import com.artemantonov.orderservice.model.Order;
 import com.artemantonov.orderservice.model.OrderLineItems;
 import com.artemantonov.orderservice.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,6 +24,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     public String placeOrder(OrderRequest orderRequest) {
         Order order = new Order();
@@ -48,6 +51,7 @@ public class OrderService {
         boolean allProductsInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
         if(allProductsInStock) {
             orderRepository.save(order);
+            kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
             return "Order placed successfully!";
         } else {
             throw new IllegalArgumentException("Product is not in the stock");

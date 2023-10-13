@@ -6,3 +6,10 @@ Start the container:
 # Launch Zipkin
 Start the container:
 ``docker run -p 9411:9411 openzipkin/zipkin``
+
+# Launch Kafka
+
+``brew install confluentinc/tap/cli``
+
+``confluent local kafka start``
+
