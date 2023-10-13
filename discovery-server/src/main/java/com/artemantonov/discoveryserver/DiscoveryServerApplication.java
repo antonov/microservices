@@ -10,7 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @SpringBootApplication
 @EnableEurekaServer
-@EnableWebSecurity
 public class DiscoveryServerApplication {
 
 	public static void main(String[] args) {
